@@ -1,0 +1,122 @@
+{
+    "manifestVersion": 1,
+    "id": "f5-tasks",
+    "name": "F5 Local Traffic Manager",
+    "version": "0.1.10",
+    "publisher": "vercellj",
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],
+    "description": "Tools for manipulating Big-IP F5 nodes and pool members.",
+    "categories": [
+        "Build and release"
+    ],
+    "tags": [
+        "Web",
+        "Farm",
+        "F5",
+        "tasks",
+        "LTM"
+    ],
+    "icons": {
+        "default": "extension-icon.png"
+    },
+    "links": {
+        "getstarted": {
+            "uri": "https://github.com/vercellone/POSH-LTM-Rest"
+        }
+	},
+    "content": {
+        "details": {
+            "path": "overview.md"
+        }
+    },
+    "galleryFlags": [
+        "Public",
+        "Preview"
+    ],
+    "files": [
+        {
+            "path": "DisableF5Node"
+        },
+        {
+            "path": "EnableF5Node"
+        },
+        {
+            "path": "DisableF5PoolMember"
+        },
+        {
+            "path": "EnableF5PoolMember"
+        },
+        {
+            "path": "BlueGreenSelection"
+        },
+        {
+            "path": "BlueGreenSwap"
+        }
+    ],
+    "contributions": [
+        {
+            "id": "DisableF5Node",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "DisableF5Node"
+            }
+        },
+        {
+            "id": "EnableF5Node",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "EnableF5Node"
+            }
+        },
+        {
+            "id": "DisableF5PoolMember",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "DisableF5PoolMember"
+            }
+        },
+        {
+            "id": "EnableF5PoolMember",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "EnableF5PoolMember"
+            }
+        },
+        {
+            "id": "BlueGreenSelection",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "BlueGreenSelection"
+            }
+        },
+        {
+            "id": "BlueGreenSwap",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "BlueGreenSwap"
+            }
+        }
+    ]
+}
