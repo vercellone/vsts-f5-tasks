@@ -11,7 +11,7 @@ begin {
     Import-Module $env:CURRENT_TASK_ROOTDIR\F5-LTM\F5-LTM.psm1 -Force
 }
 process {
-    $f5Selections = Get-ChildItem -Path $env:SYSTEM_WORKFOLDER -Filter ('F5BlueGreen-{0}-*.xml' -f $env:Release_ReleaseId)
+    $f5Selections = Get-ChildItem -Path $env:SYSTEM_WORKFOLDER -Filter ('F5BlueGreen-{0}-{1}-*.xml' -f $env:Release_ReleaseId,$env:Release_EnvironmentId)
     if ($f5Selections) {
         $swapcount = 0
         $f5Selections | ForEach-Object {

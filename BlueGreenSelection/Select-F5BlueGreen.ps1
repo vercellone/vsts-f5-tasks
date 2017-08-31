@@ -167,5 +167,5 @@ process {
         Force = [bool]$Force
         IdlePool = if (!$F5BluePool.IsActive) { $F5BluePool } else { $F5GreenPool }
         LivePool = if ($F5BluePool.IsActive) { $F5BluePool } else { $F5GreenPool }
-    } | Export-Clixml -Path (Join-Path -Path $env:SYSTEM_WORKFOLDER -ChildPath ('F5BlueGreen-{0}-{1}.xml' -f $env:Release_ReleaseId,$VirtualServer )) -Force
+    } | Export-Clixml -Path (Join-Path -Path $env:SYSTEM_WORKFOLDER -ChildPath ('F5BlueGreen-{0}-{1}-{2}.xml' -f $env:Release_ReleaseId,$env:Release_EnvironmentId,$VirtualServer )) -Force
 }
