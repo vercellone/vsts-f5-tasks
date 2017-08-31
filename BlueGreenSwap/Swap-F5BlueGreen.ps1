@@ -20,7 +20,17 @@ process {
                 $session = New-F5Session -LTMName $BlueGreenData.LTMName -LTMCredentials $BlueGreenData.Credentials -PassThrough
 
                 $BlueGreenData.VirtualServer.pool = $BlueGreenData.IdlePool.name
-                $BlueGreenData.VirtualServer | Set-VirtualServer -F5Session $session -Name $BlueGreenData.VirtualServer.name -Application $BlueGreenData.Application -Partition $BlueGreenData.Partition
+                
+                # Remove persist property if it exists.  Inclusion causes Set-VirtualServer not to update without any indication.
+                if ($BlueGreenData.VirtualServer.persist) { $BlueGreenData.VirtualServer.PSObject.properties.remove('persist'); }
+
+                $UpdatedServer = $BlueGreenData.VirtualServer | Set-VirtualServer -F5Session $session -Name $BlueGreenData.VirtualServer.name -Application $BlueGreenData.Application -Partition $BlueGreenData.Partition -PassThru
+
+                # Validate swap
+                if ($UpdatedServer.pool -ne $BlueGreenData.IdlePool.fullPath) {
+                    Write-Host "##vso[task.logissue type=error;] Blue-Green Deployment - Swap failed."
+                    throw New-Object -TypeName System.Exception -ArgumentList "Blue-Green Deployment - Swap failed."
+                }
 
                 Write-Host $BlueGreenData.VirtualServer.fullPath
                 # Output looks backwards, but accurately reflects the change; conditional is used to force output in order by category Blue, then Green
