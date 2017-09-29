@@ -157,7 +157,7 @@ process {
     Write-Host ("##vso[task.setvariable variable={0}MachineList]{1}"  -f $F5VariablePrefix,($MachineList -join ','))
     Write-Host ("##vso[task.setvariable variable={0}ServerList]{1}" -f $F5VariablePrefix,($ServerList -join ','))
 
-    [pscustomobject]@{
+    $f5Selections = [pscustomobject]@{
         LTMName = $LTMName
         Credentials = $F5Credentials
         Application = $Application
@@ -167,5 +167,21 @@ process {
         Force = [bool]$Force
         IdlePool = if (!$F5BluePool.IsActive) { $F5BluePool } else { $F5GreenPool }
         LivePool = if ($F5BluePool.IsActive) { $F5BluePool } else { $F5GreenPool }
-    } | Export-Clixml -Path (Join-Path -Path $env:SYSTEM_WORKFOLDER -ChildPath ('F5BlueGreen-{0}-{1}-{2}.xml' -f $env:Release_ReleaseId,$env:Release_EnvironmentId,$VirtualServer )) -Force
+    }
+    $storagekey = 'F5BlueGreen-{0}-{1}-{2}' -f $env:Release_ReleaseId,$env:Release_EnvironmentId,$VirtualServer
+    if ($env:SYSTEM_TOKEN) {
+        # Base64-encodes the Personal Access Token (PAT)
+        $Auth = @{ Authorization = 'Basic {0}' -f $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$($Env:SYSTEM_TOKEN)"))) }
+        $uri = '{0}/_apis/ExtensionManagement/InstalledExtensions/vercellj/f5-tasks/Data/Scopes/User/Me/Collections/%24settings/Documents?api-version=3.1-preview.1' -f ($Env:SYSTEM_TEAMFOUNDATIONSERVERURI -replace '^[^.]*\.','$0extmgmt.')
+        # Store Credentials in JSON as plain text for now.
+        $f5Selections.Credentials = [pscustomobject]@{username=$F5Credentials.UserName;password=$F5Credentials.GetNetworkCredential().Password}
+        $body = [pscustomobject]@{
+            id = $storagekey
+            '__etag' = -1
+            'value' = $f5Selections
+        } | ConvertTo-Json
+        Invoke-RestMethod -Uri $uri -Method Put -Headers $Auth -ContentType 'application/json' -Body $body | Out-Null
+    } else {
+        $f5Selections | Export-Clixml -Path (Join-Path -Path $env:SYSTEM_WORKFOLDER -ChildPath ('{0}.xml' -f $storagekey )) -Force
+    }
 }
