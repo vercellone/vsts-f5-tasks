@@ -12,9 +12,9 @@ begin {
 }
 process {
     $storagekey = 'F5BlueGreen-{0}-{1}' -f $env:Release_ReleaseId,$env:Release_EnvironmentId
-    if ($env:SYSTEM_TOKEN) {
+    if ($env:SYSTEM_ACCESSTOKEN) {
         # Base64-encodes the Personal Access Token (PAT)
-        $Auth = @{ Authorization = 'Basic {0}' -f $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$($Env:SYSTEM_TOKEN)"))) }
+        $Auth = @{ Authorization = 'Basic {0}' -f $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$($Env:SYSTEM_ACCESSTOKEN)"))) }
         $uri = '{0}/_apis/ExtensionManagement/InstalledExtensions/vercellj/f5-tasks/Data/Scopes/User/Me/Collections/%24settings/Documents?api-version=3.1-preview.1' -f ($Env:SYSTEM_TEAMFOUNDATIONSERVERURI -replace '^[^.]*\.','$0extmgmt.')
         # Store Credentials in JSON as plain text for now.
         $f5Selections = Invoke-RestMethod -Uri $uri -Method Get -Headers $Auth | Select-Object -ExpandProperty Value | Where-Object { $_.id -match "^$storagekey" }
@@ -25,7 +25,7 @@ process {
         $swapcount = 0
         $f5Selections | ForEach-Object {
             try {
-                if ($env:SYSTEM_TOKEN) {
+                if ($env:SYSTEM_ACCESSTOKEN) {
                     $BlueGreenData = Invoke-NullCoalescing {$_.value} {$_}
                     # Re-constitute credentials from plaintext
                     $SecurePassword = ConvertTo-SecureString $BlueGreenData.Credentials.Password -AsPlainText -Force
@@ -67,7 +67,7 @@ process {
                         Write-Host ("##vso[task.logissue type=warning;] Failed to sync device to group {0}" -f $BlueGreenData.DeviceGroup)
                     }
                 }
-                if ($env:SYSTEM_TOKEN) {
+                if ($env:SYSTEM_ACCESSTOKEN) {
                     $uri = '{0}/_apis/ExtensionManagement/InstalledExtensions/vercellj/f5-tasks/Data/Scopes/User/Me/Collections/%24settings/Documents/{1}?api-version=3.1-preview.1' -f ($Env:SYSTEM_TEAMFOUNDATIONSERVERURI -replace '^[^.]*\.','$0extmgmt.'),$_.id
                     Invoke-RestMethod -Uri $uri -Method Delete -Headers $Auth
                 } else {
