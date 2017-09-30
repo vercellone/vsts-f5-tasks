@@ -180,7 +180,7 @@ process {
             '__etag' = -1
             'value' = $f5Selections
         } | ConvertTo-Json
-        Invoke-RestMethod -Uri $uri -Method Put -Headers $Auth -ContentType 'application/json' -Body $body | Out-Null
+        Invoke-RestMethodOverride -Uri $uri -Method Put -Headers $Auth -ContentType 'application/json' -Body $body | Out-Null
     } else {
         $f5Selections | Export-Clixml -Path (Join-Path -Path $env:SYSTEM_WORKFOLDER -ChildPath ('{0}.xml' -f $storagekey )) -Force
     }
