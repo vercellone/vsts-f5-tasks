@@ -15,7 +15,7 @@ process {
     if ($env:SYSTEM_ACCESSTOKEN) {
         # Base64-encodes the Personal Access Token (PAT)
         $Auth = @{ Authorization = 'Basic {0}' -f $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$($Env:SYSTEM_ACCESSTOKEN)"))) }
-        $uri = '{0}/_apis/ExtensionManagement/InstalledExtensions/vercellj/f5-tasks/Data/Scopes/User/Me/Collections/%24settings/Documents?api-version=3.1-preview.1' -f ($Env:SYSTEM_TEAMFOUNDATIONSERVERURI -replace '^[^.]*\.','$0extmgmt.')
+        $uri = '{0}/_apis/ExtensionManagement/InstalledExtensions/vercellj/f5-tasks/Data/Scopes/User/Me/Collections/%24settings/Documents?api-version=3.1-preview.1' -f ($Env:SYSTEM_TEAMFOUNDATIONSERVERURI -replace '\.vsrm\.','.extmgmt.')
         # Store Credentials in JSON as plain text for now.
         $f5Selections = Invoke-RestMethodOverride -Uri $uri -Method Get -Headers $Auth | Select-Object -ExpandProperty Value | Where-Object { $_.id -match "^$storagekey" }
     } else {
@@ -68,7 +68,7 @@ process {
                     }
                 }
                 if ($env:SYSTEM_ACCESSTOKEN) {
-                    $uri = '{0}/_apis/ExtensionManagement/InstalledExtensions/vercellj/f5-tasks/Data/Scopes/User/Me/Collections/%24settings/Documents/{1}?api-version=3.1-preview.1' -f ($Env:SYSTEM_TEAMFOUNDATIONSERVERURI -replace '^[^.]*\.','$0extmgmt.'),$_.id
+                    $uri = '{0}/_apis/ExtensionManagement/InstalledExtensions/vercellj/f5-tasks/Data/Scopes/User/Me/Collections/%24settings/Documents/{1}?api-version=3.1-preview.1' -f ($Env:SYSTEM_TEAMFOUNDATIONSERVERURI -replace '\.vsrm\.','.extmgmt.'),$_.id
                     Invoke-RestMethodOverride -Uri $uri -Method Delete -Headers $Auth
                 } else {
                     Remove-Item -Path $_.FullName -Force

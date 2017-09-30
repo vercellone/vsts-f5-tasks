@@ -172,7 +172,8 @@ process {
     if ($env:SYSTEM_ACCESSTOKEN) {
         # Base64-encodes the Personal Access Token (PAT)
         $Auth = @{ Authorization = 'Basic {0}' -f $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$($Env:SYSTEM_ACCESSTOKEN)"))) }
-        $uri = '{0}/_apis/ExtensionManagement/InstalledExtensions/vercellj/f5-tasks/Data/Scopes/User/Me/Collections/%24settings/Documents?api-version=3.1-preview.1' -f ($Env:SYSTEM_TEAMFOUNDATIONSERVERURI -replace '^[^.]*\.','$0extmgmt.')
+        $uri = '{0}/_apis/ExtensionManagement/InstalledExtensions/vercellj/f5-tasks/Data/Scopes/User/Me/Collections/%24settings/Documents?api-version=3.1-preview.1' -f ($Env:SYSTEM_TEAMFOUNDATIONSERVERURI -replace '\.vsrm\.','.extmgmt.')
+
         # Store Credentials in JSON as plain text for now.
         $f5Selections.Credentials = [pscustomobject]@{username=$F5Credentials.UserName;password=$F5Credentials.GetNetworkCredential().Password}
         $body = [pscustomobject]@{
