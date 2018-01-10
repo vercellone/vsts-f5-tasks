@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "f5-tasks",
     "name": "F5 Local Traffic Manager",
-    "version": "0.1.10",
+    "version": "0.1.23",
     "publisher": "vercellj",
     "targets": [
         {
@@ -76,6 +76,16 @@
             ],
             "properties": {
                 "name": "EnableF5Node"
+            }
+        },
+        {
+            "id": "TestF5Node",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "TestF5Node"
             }
         },
         {
