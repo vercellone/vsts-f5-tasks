@@ -49,8 +49,11 @@ process {
             }
         }
     }
-    if (-not $isStateMatch) {
+    if ($isStateMatch) {
+        Write-Host '##vso[task.complete result=Succeeded]'
+    } else {
         $statusshapeExpected = Get-StatusShape -session $NodeSession -state $NodeState
-        Write-Host ('##vso[task.logissue type=error;] Test-Node - failed.  Expected all nodes to be session = {0}; state = {1}; f5 status shape = {2}.' -f $NodeSession,$NodeState,$statusshapeExpected)
+        Write-Host ('##vso[task.logissue type=error;] Expected all nodes to be session = {0}; state = {1}; f5 status shape = {2}.' -f $NodeSession,$NodeState,$statusshapeExpected)
+        Write-Host '##vso[task.complete result=Failed]'
     }
 }
