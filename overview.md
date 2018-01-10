@@ -20,6 +20,10 @@ These tasks require REST API connectivity to a Big-IP F5 v11.5.1 Build 8.0.175 H
 
    This task `enables` pool member(s) identified by a pool name and member name regular expression.
 
+1. **Test - Node**
+
+   This task `verifies` node(s) status.
+
 1. **Blue-Green Deployment - Selection**
 
    This task facilitates [blue-green deployments](https://martinfowler.com/bliki/BlueGreenDeployment.html).  You specify a virtual server and 2 pool names.  The pool members will be identified and validated then the idle pool's members will be output to $(F5MachineList) and $(F5ServerList) environment variables for use in subsequent tasks.  It is intended to be paired with a subsequent 'Blue-Green Deployment - Swap' task which will swap the virtual server's active pool based on the output of this task.
