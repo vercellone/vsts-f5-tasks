@@ -45,6 +45,9 @@
             "path": "EnableF5Node"
         },
         {
+            "path": "TestF5Node"
+        },
+        {
             "path": "DisableF5PoolMember"
         },
         {
