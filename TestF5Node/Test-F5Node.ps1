@@ -3,6 +3,7 @@
     Disable the specified node(s).
 #>
 [cmdletBinding()]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingPlainTextForPassword","")]
 param(
     [Parameter(Mandatory)]
     [string]$LTMName,
