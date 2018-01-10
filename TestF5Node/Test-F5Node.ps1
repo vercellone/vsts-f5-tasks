@@ -3,7 +3,6 @@
     Disable the specified node(s).
 #>
 [cmdletBinding()]
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingPlainTextForPassword")]
 param(
     [Parameter(Mandatory)]
     [string]$LTMName,
@@ -16,9 +15,9 @@ param(
     [Parameter(Mandatory)]
     [string[]]$Name,
     [Parameter(Mandatory)]
-    [string]$Session,
+    [string]$NodeSession,
     [Parameter(Mandatory)]
-    [string]$State
+    [string]$NodeState
 )
 begin {
     if (!$env:CURRENT_TASK_ROOTDIR) {
@@ -39,17 +38,18 @@ process {
                 $items = Get-Node -F5Session $session -Name $itemname -Partition $Partition -ErrorAction SilentlyContinue
                 $items | ForEach-Object {
                     $statusshape = Get-StatusShape -state $_.state -session $_.session
-                    if ($_.session -ne $Session -or $_.state -ne $State) {
+                    if ($_.session -ne $NodeSession -or $_.state -ne $NodeState) {
                         $isStateMatch = $false
-                        Write-Host ('##vso[task.logissue type=warning;] {0} ({1}): {2},{3} ({4})' -f $_.name,$_.address,$_.session,$_.state,$statusshape)
+                        Write-Host ('##vso[task.logissue type=warning;] {0} ({1}): session = {2}; state = {3}; f5 status shape = {4}' -f $_.name,$_.address,$_.session,$_.state,$statusshape)
                     } else {
-                        Write-Host ('(){0} ({1}): {2} {3} ({4})' -f $_.name,$_.address,$_.session,$_.state,$statusshape)
+                        Write-Host ('{0} ({1}): session = {2}; state = {3}; f5 status shape = {4}' -f $_.name,$_.address,$_.session,$_.state,$statusshape)
                     }
                 }
             }
         }
     }
     if (-not $isStateMatch) {
-        Write-Host "##vso[task.logissue type=error;] Test-Node - failed.  One or more nodes are in an inconsistent state."
+        $statusshapeExpected = Get-StatusShape -session $NodeSession -state $NodeState
+        Write-Host ('##vso[task.logissue type=error;] Test-Node - failed.  Expected all nodes to be session = {0}; state = {1}; f5 status shape = {2}.' -f $NodeSession,$NodeState,$statusshapeExpected)
     }
 }
