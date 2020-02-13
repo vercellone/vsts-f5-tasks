@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "f5-tasks",
     "name": "F5 Local Traffic Manager",
-    "version": "0.1.23",
+    "version": "1.0.0",
     "publisher": "vercellj",
     "targets": [
         {
@@ -11,7 +11,7 @@
     ],
     "description": "Tools for manipulating Big-IP F5 nodes and pool members.",
     "categories": [
-        "Build and release"
+        "Azure Pipelines"
     ],
     "tags": [
         "Web",
@@ -33,10 +33,7 @@
             "path": "overview.md"
         }
     },
-    "galleryFlags": [
-        "Public",
-        "Preview"
-    ],
+    "public": true,
     "files": [
         {
             "path": "DisableF5Node"
