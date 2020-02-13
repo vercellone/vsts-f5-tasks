@@ -25,5 +25,9 @@
       "argumentFormat": "",
       "workingDirectory": "$(currentDirectory)"
     }
-  }
+  },
+  "modules": [
+    "VstsTaskSdk",
+    "F5-LTM"
+  ]
 }

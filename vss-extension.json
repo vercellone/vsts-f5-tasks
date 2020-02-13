@@ -33,7 +33,7 @@
             "path": "overview.md"
         }
     },
-    "public": false,
+    "public": true,
     "files": [
         {
             "path": "DisableF5Node"
