@@ -33,9 +33,7 @@
             "path": "overview.md"
         }
     },
-    "galleryFlags": [
-        "Public"
-    ],
+    "public": false,
     "files": [
         {
             "path": "DisableF5Node"
