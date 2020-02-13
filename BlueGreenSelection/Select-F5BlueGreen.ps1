@@ -41,13 +41,8 @@ param(
 )
 begin {
     $Force = $false
-    if (!$env:CURRENT_TASK_ROOTDIR) {
-        $env:CURRENT_TASK_ROOTDIR = Split-Path -Parent $MyInvocation.MyCommand.Path
-    }
-    Import-Module $env:CURRENT_TASK_ROOTDIR\F5-LTM\F5-LTM.psm1 -Force
-
     $SecurePassword = ConvertTo-SecureString $Password -AsPlainText -Force
-    $F5Credentials = New-Object System.Management.Automation.PSCredential ($UserName, $SecurePassword)
+    $F5Credentials = [System.Management.Automation.PSCredential]::new($UserName, $SecurePassword)
     $session = New-F5Session -LTMName $LTMName -LTMCredentials $F5Credentials -PassThrough
 }
 process {
@@ -57,7 +52,7 @@ process {
     $F5VirtualServer = Get-VirtualServer -F5Session $session -Application $Application -Name $VirtualServer -Partition $Partition -ErrorAction SilentlyContinue
     if ($null -eq $F5VirtualServer) {
         Write-Host "##vso[task.logissue type=error;] '$VirtualServer' virtual server not found."
-        throw New-Object -TypeName System.ArgumentException -ArgumentList "'$VirtualServer' virtual server not found.",'VirtualServer'
+        throw [System.ArgumentException]::new("'$VirtualServer' virtual server not found.",'VirtualServer')
     }
     Write-Host $F5VirtualServer.fullPath
 
@@ -69,14 +64,14 @@ process {
         Add-Member -MemberType ScriptProperty -Name IsActive -Value { $this.fullPath -eq $($F5VirtualServer.pool) } -PassThru
     if ($null -eq $F5BluePool) {
         Write-Host "##vso[task.logissue type=error;] '$BluePool' BLUE pool not found"
-        throw New-Object -TypeName System.ArgumentException -ArgumentList "'$BluePool' BLUE pool not found.",'BluePool'
+        throw [System.ArgumentException]::new("'$BluePool' BLUE pool not found.",'BluePool')
     }
     $F5GreenPool = Get-Pool -F5Session $session -PoolName $GreenPool -Application $Application -Partition $Partition -ErrorAction SilentlyContinue |
         Add-Member -MemberType NoteProperty -Name Category -Value 'Green' -PassThru |
         Add-Member -MemberType ScriptProperty -Name IsActive -Value { $this.fullPath -eq $($F5VirtualServer.pool) } -PassThru
     if ($null -eq $F5GreenPool) {
         Write-Host "##vso[task.logissue type=error;] '$GreenPool' GREEN pool not found"
-        throw New-Object -TypeName System.ArgumentException -ArgumentList "'$GreenPool' GREEN pool not found.",'GreenPool'
+        throw [System.ArgumentException]::new("'$GreenPool' GREEN pool not found.",'GreenPool')
     }
 
     #endregion
@@ -89,7 +84,7 @@ process {
     }
     if ($null -eq $F5BlueMembers) {
         Write-Host "##vso[task.logissue type=error;] '$BluePool' BLUE pool contains no members."
-        throw New-Object -TypeName System.ArgumentException -ArgumentList "'$BluePool' BLUE pool contains no members.",'BluePool'
+        throw [System.ArgumentException]::new("'$BluePool' BLUE pool contains no members.",'BluePool')
     }
     # test for active pool members
     if (($F5BlueMembers | Where-Object { ( $_.State -eq 'up' -and $_.Session -eq 'monitor-enabled' ) -or ( $_.State -eq 'unchecked' -and $_.Session -eq 'user-enabled' ) }).Count -eq 0) {
@@ -98,7 +93,7 @@ process {
     # test for enabled pool members
     if (($F5BlueMembers | Where-Object { 'monitor-enabled','user-enabled' -contains $_.Session }).Count -eq 0) {
         Write-Host "##vso[task.logissue type=error;] '$BluePool' BLUE pool contains no ENABLED members."
-        throw New-Object -TypeName System.ArgumentException -ArgumentList "'$BluePool' BLUE pool contains no ENABLED members.",'BluePool'
+        throw [System.ArgumentException]::new("'$BluePool' BLUE pool contains no ENABLED members.",'BluePool')
     }
     #endregion
 
@@ -110,7 +105,7 @@ process {
     }
     if ($null -eq $F5GreenMembers) {
         Write-Host "##vso[task.logissue type=error;] '$GreenPool' GREEN pool contains no members."
-        throw New-Object -TypeName System.ArgumentException -ArgumentList "'$GreenPool' ENABLED pool contains no members.",'GreenPool'
+        throw [System.ArgumentException]::new("'$GreenPool' ENABLED pool contains no members.",'GreenPool')
     }
     # test for active pool members
     if (($F5GreenMembers | Where-Object { ( $_.State -eq 'up' -and $_.Session -eq 'monitor-enabled' ) -or ( $_.State -eq 'unchecked' -and $_.Session -eq 'user-enabled' ) }).Count -eq 0) {
@@ -119,7 +114,7 @@ process {
     # test for enabled pool members
     if (($F5GreenMembers | Where-Object { 'monitor-enabled','user-enabled' -contains $_.Session }).Count -eq 0) {
         Write-Host "##vso[task.logissue type=error;] '$GreenPool' GREEN pool contains no ENABLED members."
-        throw New-Object -TypeName System.ArgumentException -ArgumentList "'$GreenPool' GREEN pool contains no ENABLED members.",'GreenPool'
+        throw [System.ArgumentException]::new("'$GreenPool' GREEN pool contains no ENABLED members.",'GreenPool')
     }
     #endregion
 
@@ -131,7 +126,7 @@ process {
             Write-Host ("##vso[task.logissue type=warning;] Pool member collision: {0}" -f $_.InputObject)
         }
         Write-Host "##vso[task.logissue type=error;] Pool member collision(s) detected.  Pool members cannot exist in both the Blue and Green pools"
-        throw New-Object -TypeName System.ArgumentException -ArgumentList "'$GreenPool' Pool member collision(s) detected.  Pool members cannot exist in both Blue and Green",'GreenPool'
+        throw [System.ArgumentException]::new("'$GreenPool' Pool member collision(s) detected.  Pool members cannot exist in both Blue and Green",'GreenPool')
     }
 
     #endregion
@@ -169,20 +164,17 @@ process {
         LivePool = if ($F5BluePool.IsActive) { $F5BluePool } else { $F5GreenPool }
     }
     $storagekey = 'F5BlueGreen-{0}-{1}-{2}' -f $env:Release_ReleaseId,$env:Release_EnvironmentId,$VirtualServer
-    if ($env:SYSTEM_ACCESSTOKEN) {
-        # Base64-encodes the Personal Access Token (PAT)
-        $Auth = @{ Authorization = 'Basic {0}' -f $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$($Env:SYSTEM_ACCESSTOKEN)"))) }
-        $uri = '{0}/_apis/ExtensionManagement/InstalledExtensions/vercellj/f5-tasks/Data/Scopes/User/Me/Collections/%24settings/Documents?api-version=3.1-preview.1' -f ($Env:SYSTEM_TEAMFOUNDATIONSERVERURI -replace '\.vsrm\.','.extmgmt.')
+    # Base64-encodes the Personal Access Token (PAT)
+    $VstsAccessToken = (Get-EndPoint -Name SystemVssConnection -Require).auth.parameters.AccessToken
+    $Auth = @{ Authorization = 'Basic {0}' -f $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$($VstsAccessToken)"))) }
+    $uri = '{0}/_apis/ExtensionManagement/InstalledExtensions/vercellj/f5-tasks/Data/Scopes/User/Me/Collections/%24settings/Documents?api-version=3.1-preview.1' -f ($Env:SYSTEM_TEAMFOUNDATIONSERVERURI -replace '\.vsrm\.','.extmgmt.')
 
-        # Store Credentials in JSON as plain text for now.
-        $f5Selections.Credentials = [pscustomobject]@{username=$F5Credentials.UserName;password=$F5Credentials.GetNetworkCredential().Password}
-        $body = [pscustomobject]@{
-            id = $storagekey
-            '__etag' = -1
-            'value' = $f5Selections
-        } | ConvertTo-Json
-        Invoke-RestMethodOverride -Uri $uri -Method Put -Headers $Auth -ContentType 'application/json' -Body $body | Out-Null
-    } else {
-        $f5Selections | Export-Clixml -Path (Join-Path -Path $env:SYSTEM_WORKFOLDER -ChildPath ('{0}.xml' -f $storagekey )) -Force
-    }
+    # Store Credentials in JSON as plain text for now.
+    $f5Selections.Credentials = [pscustomobject]@{username=$F5Credentials.UserName;password=$F5Credentials.GetNetworkCredential().Password}
+    $body = [pscustomobject]@{
+        id = $storagekey
+        '__etag' = -1
+        'value' = $f5Selections
+    } | ConvertTo-Json
+    Invoke-RestMethodOverride -Uri $uri -Method Put -Headers $Auth -ContentType 'application/json' -Body $body | Out-Null
 }

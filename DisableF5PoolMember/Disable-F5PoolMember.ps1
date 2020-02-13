@@ -24,13 +24,8 @@ param(
     [string]$Force='false'
 )
 begin {
-    if (!$env:CURRENT_TASK_ROOTDIR) {
-        $env:CURRENT_TASK_ROOTDIR = Split-Path -Parent $MyInvocation.MyCommand.Path
-    }
-    Import-Module $env:CURRENT_TASK_ROOTDIR\F5-LTM\F5-LTM.psm1 -Force
-
     $secpasswd = ConvertTo-SecureString $Password -AsPlainText -Force
-    $f5creds = New-Object System.Management.Automation.PSCredential ($UserName, $secpasswd)
+    $f5creds = [System.Management.Automation.PSCredential]::new($UserName, $secpasswd)
     $session = New-F5Session -LTMName $LTMName -LTMCredentials $f5creds -PassThrough
 }
 process {
